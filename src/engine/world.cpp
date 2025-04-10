@@ -117,11 +117,9 @@ void World::update(float delta) {
   }
 }
 
-void World::render(float delta) {
+void World::render(float alpha) {
   for (const auto &[system, entities] : render_systems) {
-    for (int i = 0; i < system->subticks; i++) {
-      system->execute(*entities, delta / system->subticks, this);
-    }
+    system->execute(*entities, alpha, this);
   }
 }
 
