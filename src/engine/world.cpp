@@ -16,11 +16,21 @@ Entity *World::spawn() {
 
 void World::despawn(Entity *entity) { despawned.push_back(entity); }
 
-void World::collect(Entity *entity, Archetype previous) {
-  auto &group = archetypes[previous];
+void World::detach(Entity *entity, Archetype archetype) {
+  auto &group = archetypes[archetype];
   group.erase(entity);
   if (group.empty())
-    archetypes.erase(previous);
+    archetypes.erase(archetype);
+
+  for (auto [system, entities] : systems) {
+    entities->erase(entity);
+    system->cleanup(entity);
+  }
+};
+void World::detach(Entity *entity) { detach(entity, entity->archetype); };
+
+void World::collect(Entity *entity, Archetype previous) {
+  detach(entity);
   archetypes[entity->archetype].insert(entity);
   sync(entity);
 }
@@ -43,7 +53,7 @@ void World::add(System *system) {
 
   for (auto &[_, entities_] : archetypes) {
     for (auto &entity : entities_) {
-        sync(entity, system, entities);
+      sync(entity, system, entities);
     }
   }
 }
@@ -87,25 +97,31 @@ void World::sync(Entity *entity) {
 }
 
 void World::update(float delta) {
-    for (Entity *entity : despawned) {
-        entity->dispose();
-        pool.push_back(entity);
-    }
-    despawned.clear();
+  for (Entity *entity : despawned) {
+    detach(entity);
+    entity->dispose();
+    pool.push_back(entity);
+  }
+  despawned.clear();
 
-    for (const auto &[system, entities] : sorted_systems) {
-        system->execute(*entities, delta, this);
+  for (const auto &[system, entities] : sorted_systems) {
+    for (int i = 0; i < system->subticks; i++) {
+      system->execute(*entities, delta / system->subticks, this);
     }
+  }
 
-    for (const auto &[system, entities] : unordered_systems) {
-        system->execute(*entities, delta, this);
+  for (const auto &[system, entities] : unordered_systems) {
+    for (int i = 0; i < system->subticks; i++) {
+      system->execute(*entities, delta / system->subticks, this);
     }
+  }
 }
-
 
 void World::render(float delta) {
   for (const auto &[system, entities] : render_systems) {
-    system->execute(*entities, delta, this);
+    for (int i = 0; i < system->subticks; i++) {
+      system->execute(*entities, delta / system->subticks, this);
+    }
   }
 }
 
@@ -132,8 +148,7 @@ void World::sort_systems() {
 
   std::function<void(System *)> visit = [&](System *system) {
     if (temp[system]) {
-      throw std::runtime_error(
-          "Circular dependency in ordered systems");
+      throw std::runtime_error("Circular dependency in ordered systems");
     }
     if (!visited[system]) {
       temp[system] = true;
