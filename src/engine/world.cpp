@@ -30,7 +30,7 @@ void World::detach(Entity *entity, Archetype archetype) {
 void World::detach(Entity *entity) { detach(entity, entity->archetype); };
 
 void World::collect(Entity *entity, Archetype previous) {
-  detach(entity);
+  detach(entity, previous);
   archetypes[entity->archetype].insert(entity);
   sync(entity);
 }
