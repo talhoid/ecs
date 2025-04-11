@@ -60,7 +60,7 @@ private:
 
   void sort_systems();
   void sync(Entity *entity);
-  void detach(Entity* entity, Archetype archetype);
-  void detach(Entity* entity);
+  void detach(Entity *entity, Archetype archetype);
+  void detach(Entity *entity);
   void sync(Entity *entity, System *system, Entities *entities);
 };

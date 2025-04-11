@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include "component.hpp"
 #include "entity.hpp"
 #include "system.hpp"
 #include <functional>
@@ -70,7 +71,7 @@ void World::compile() {
   for (auto &[system, entities] : ordered_systems) {
     for (auto &required : system->requires) {
       for (auto &[candidate, candidate_entities] : unordered_systems) {
-        if (std::type_index(typeid(*candidate)) == required) {
+        if (get_type_id(candidate) == required) {
           candidate->mode = System::Mode::Ordered;
           ordered_systems.insert({candidate, candidate_entities});
           unordered_systems.erase(candidate);
@@ -133,7 +134,7 @@ void World::sort_systems() {
   for (auto &[system, entities] : ordered_systems) {
     for (auto &required : system->requires) {
       for (auto &[candidate, _] : ordered_systems) {
-        if (std::type_index(typeid(*candidate)) == required) {
+        if (get_type_id(candidate) == required) {
           graph[system].push_back(candidate);
         }
       }
@@ -146,7 +147,9 @@ void World::sort_systems() {
 
   std::function<void(System *)> visit = [&](System *system) {
     if (temp[system]) {
-      throw std::runtime_error("Circular dependency in ordered systems");
+      throw std::runtime_error(
+          "Circular dependency in ordered systems involving " +
+          get_type_name(system));
     }
     if (!visited[system]) {
       temp[system] = true;
@@ -159,7 +162,7 @@ void World::sort_systems() {
     }
   };
 
-  for (auto &[system, entities] : ordered_systems) {
+  for (auto &[system, _] : ordered_systems) {
     if (!visited[system]) {
       visit(system);
     }
