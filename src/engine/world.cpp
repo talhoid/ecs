@@ -17,7 +17,7 @@ Entity *World::spawn() {
 
 void World::despawn(Entity *entity) { despawned.push_back(entity); }
 
-void World::detach(Entity *entity, Archetype archetype) {
+void World::detach(Entity *entity, ComponentMask archetype) {
   auto &group = archetypes[archetype];
   group.erase(entity);
   if (group.empty())
@@ -30,7 +30,7 @@ void World::detach(Entity *entity, Archetype archetype) {
 };
 void World::detach(Entity *entity) { detach(entity, entity->archetype); };
 
-void World::collect(Entity *entity, Archetype previous) {
+void World::collect(Entity *entity, ComponentMask previous) {
   detach(entity, previous);
   archetypes[entity->archetype].insert(entity);
   sync(entity);
