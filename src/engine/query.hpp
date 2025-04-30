@@ -20,7 +20,7 @@ public:
     }
 
     void compile(World *world);
-    bool match(const ComponentMask *archetype);
+    bool match(const ComponentMask *mask);
     Entities execute(std::unordered_map<ComponentMask, Entities> archetypes);
 
 private:

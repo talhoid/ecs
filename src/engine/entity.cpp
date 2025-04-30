@@ -8,5 +8,5 @@ void Entity::despawn() { world->despawn(this); }
 
 void Entity::dispose() {
   components.clear();
-  archetype.reset();
+  mask.reset();
 }

@@ -11,28 +11,28 @@ Entity *World::spawn() {
   Entity *entity = pool.empty() ? new Entity(++next_id, this) : pool.back();
   if (!pool.empty())
     pool.pop_back();
-  archetypes[entity->archetype].insert(entity);
+  archetypes[entity->mask].insert(entity);
   return entity;
 }
 
 void World::despawn(Entity *entity) { despawned.push_back(entity); }
 
-void World::detach(Entity *entity, ComponentMask archetype) {
-  auto &group = archetypes[archetype];
+void World::detach(Entity *entity, ComponentMask mask) {
+  auto &group = archetypes[mask];
   group.erase(entity);
   if (group.empty())
-    archetypes.erase(archetype);
+    archetypes.erase(mask);
 
   for (auto [system, entities] : systems) {
     entities->erase(entity);
     system->cleanup(entity);
   }
 };
-void World::detach(Entity *entity) { detach(entity, entity->archetype); };
+void World::detach(Entity *entity) { detach(entity, entity->mask); };
 
 void World::collect(Entity *entity, ComponentMask previous) {
   detach(entity, previous);
-  archetypes[entity->archetype].insert(entity);
+  archetypes[entity->mask].insert(entity);
   sync(entity);
 }
 
@@ -84,7 +84,7 @@ void World::compile() {
 }
 
 void World::sync(Entity *entity, System *system, Entities *entities) {
-  if (system->query.match(&(entity->archetype))) {
+  if (system->query.match(&(entity->mask))) {
     entities->insert(entity);
   } else {
     entities->erase(entity);

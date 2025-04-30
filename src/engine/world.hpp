@@ -58,7 +58,7 @@ private:
 
   void sort_systems();
   void sync(Entity *entity);
-  void detach(Entity *entity, ComponentMask archetype);
+  void detach(Entity *entity, ComponentMask mask);
   void detach(Entity *entity);
   void sync(Entity *entity, System *system, Entities *entities);
 };

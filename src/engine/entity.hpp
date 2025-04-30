@@ -26,7 +26,7 @@ public:
     void despawn();
     void dispose();
 
-    ComponentMask archetype;
+    ComponentMask mask;
     const int id;
 
 private:
