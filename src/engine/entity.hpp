@@ -1,35 +1,33 @@
 #pragma once
 #include "component.hpp"
-#include <unordered_map>
-#include <typeindex>
-#include <any>
 
 class World;
+class Archetype;
 
 class Entity {
 public:
-    Entity(int id, World *world);
+    Entity(int id, World* world);
 
-    template <typename T, typename... Args,
-              typename std::enable_if_t<std::is_constructible_v<T, Args...>> * = nullptr>
-    Entity &add(Args&&... args);
+    template<typename T, typename... Args>
+    Entity& add(Args&&... args);
 
-    template <typename T>
-    Entity &remove();
+    template<typename T>
+    Entity& remove();
 
-    template <typename T>
-    T *get();
+    template<typename T>
+    T* get();
 
-    template <typename T>
+    template<typename T>
     bool has();
 
     void despawn();
     void dispose();
 
-    ComponentMask mask;
     const int id;
+    ComponentMask mask;
+    Archetype* archetype;
+    size_t index;
 
 private:
-    World *world;
-    std::unordered_map<std::type_index, std::any> components;
+    World* world;
 };

@@ -1,31 +1,32 @@
 #pragma once
 #include "component.hpp"
-#include "entity.hpp"
-#include <unordered_set>
+#include <typeindex>
+#include <vector>
 
-using Entities = std::unordered_set<Entity *>;
+class World;
 
 class Query {
 public:
-    template <typename T>
-    Query &has() {
-        requires.insert(get_type_id<T>());
+    Query() = default;
+    
+    template<typename T>
+    Query& has() {
+        requires.push_back(get_type_id<T>());
         return *this;
     }
-
-    template <typename T>
-    Query &without() {
-        rejects.insert(get_type_id<T>());
+    
+    template<typename T>
+    Query& not_() {
+        rejects.push_back(get_type_id<T>());
         return *this;
     }
-
-    void compile(World *world);
-    bool match(const ComponentMask *mask);
-    Entities execute(std::unordered_map<ComponentMask, Entities> archetypes);
+    
+    void compile(World* world);
+    bool matches(ComponentMask mask) const;
 
 private:
-    ComponentMask required = 0;
-    ComponentMask rejected = 0;
-    std::unordered_set<std::type_index> requires;
-    std::unordered_set<std::type_index> rejects;
+    std::vector<std::type_index> requires;
+    std::vector<std::type_index> rejects;
+    ComponentMask required;
+    ComponentMask rejected;
 };

@@ -3,4 +3,7 @@
 #include "src/engine/entity.hpp"
 #include "src/engine/entity.t.hpp"
 #include "src/engine/world.hpp"
+#include "src/engine/archetypes.hpp"
+#include "src/engine/archetypes.t.hpp"
 #include "src/engine/query.hpp"
+#include "src/engine/logger.hpp"

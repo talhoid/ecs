@@ -1,5 +1,6 @@
 #pragma once
 #include "query.hpp"
+#include "entities.hpp"
 #include <vector>
 
 class World;
